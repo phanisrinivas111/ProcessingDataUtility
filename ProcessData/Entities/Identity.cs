@@ -1,4 +1,4 @@
-﻿namespace ProcessingDataUtility.Entities
+﻿namespace ProcessData.Entities
 {
     public class Identity
     {

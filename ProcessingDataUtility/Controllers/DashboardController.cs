@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ProcessingDataUtility.Entities;
-using ProcessingDataUtility.Services;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Newtonsoft.Json;
+using ProcessData.Entities;
+using ProcessData.Services;
 
 namespace ProcessingDataUtility.Controllers
 {
@@ -42,14 +42,45 @@ namespace ProcessingDataUtility.Controllers
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 };
 
-                string json = JsonSerializer.Serialize(dashboardData, options);
+                string json = System.Text.Json.JsonSerializer.Serialize(dashboardData, options);
                 _processDataService.SaveJson(dashboardData, "path_to_output_json_file.json");
-                return Ok();
+                return Ok(json);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+
+        [HttpPost("upload")]
+        public async Task<IActionResult> Upload([FromForm] IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest("No file uploaded.");
+                }
+                else if (Path.GetExtension(file.FileName).ToUpper() != ".JSON")
+                {
+                    return BadRequest("Upload json file.");
+                }
+
+                return Ok(await _processDataService.ProcessData(file));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+
+        }
+
+
+        public class FileUploadRequest
+        {
+            public string? UploaderName { get; set; }
+            public string? UploaderAddress { get; set; }
+            public IFormFile? File { get; set; }
         }
     }
 }

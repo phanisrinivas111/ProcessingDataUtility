@@ -1,7 +1,9 @@
-﻿using ProcessingDataUtility.Entities;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using ProcessData.Entities;
 using System.Text.Json;
 
-namespace ProcessingDataUtility.Services
+namespace ProcessData.Services
 {
     public class ProcessDataService:IProcessDataService
     {
@@ -10,7 +12,7 @@ namespace ProcessingDataUtility.Services
             try
             {
                 var jsonData = File.ReadAllText(filePath);
-                var dashboardData = JsonSerializer.Deserialize<Root>(jsonData);
+                var dashboardData = System.Text.Json.JsonSerializer.Deserialize<Root>(jsonData);
                 return dashboardData;
             }
             catch (FileNotFoundException ex)
@@ -18,7 +20,7 @@ namespace ProcessingDataUtility.Services
                 Console.WriteLine($"File not found: {ex.Message}");
                 throw;
             }
-            catch (JsonException ex)
+            catch (System.Text.Json.JsonException ex)
             {
                 Console.WriteLine($"JSON parsing error: {ex.Message}");
                 throw;
@@ -38,7 +40,7 @@ namespace ProcessingDataUtility.Services
                 {
                     WriteIndented = true
                 };
-                var jsonData = JsonSerializer.Serialize(data, options);
+                var jsonData = System.Text.Json.JsonSerializer.Serialize(data, options);
                 File.WriteAllText(filePath, jsonData);
             }
             catch (Exception ex)
@@ -46,6 +48,17 @@ namespace ProcessingDataUtility.Services
                 Console.WriteLine($"Error saving JSON: {ex.Message}");
                 throw;
             }
+        }
+      public async  Task<Root> ProcessData(IFormFile file)
+        {
+            Root root;
+           
+            using (var stream = new StreamReader(file.OpenReadStream()))
+            {
+                var json = await stream.ReadToEndAsync();
+                root= JsonConvert.DeserializeObject<Root>(json);
+            }
+            return root;
         }
     }
 }
