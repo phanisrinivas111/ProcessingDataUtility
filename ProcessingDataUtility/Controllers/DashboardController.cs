@@ -53,7 +53,7 @@ namespace ProcessingDataUtility.Controllers
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload([FromForm] IFormFile file)
+        public async Task<IActionResult> Upload(IFormFile file)
         {
             try
             {
@@ -73,14 +73,6 @@ namespace ProcessingDataUtility.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
 
-        }
-
-
-        public class FileUploadRequest
-        {
-            public string? UploaderName { get; set; }
-            public string? UploaderAddress { get; set; }
-            public IFormFile? File { get; set; }
         }
     }
 }
